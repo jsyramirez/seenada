@@ -1,5 +1,5 @@
 # seenada
 End to End Secure Chat Application
-#Authors
+# Authors
 Jocelyn Ramirez (jsyramirez@gmail.com)
 Thanh Tran ()
