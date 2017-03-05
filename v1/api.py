@@ -21,6 +21,17 @@ def sign_up():
     db.insert_user(username, hashed_password) 
     return "added"
 
+@app.route('/signin', methods=['POST'])
+def signin():
+    content = request.get_json(force=True)
+    username = content['username']
+    password = content['password']
+    hash_password = hashlib.sha512(password).hexdigest()
+    result = db.get_user(username)
+    if result[1] != hash_password:
+        abort(403)
+    else:
+        return "sign in successfully"    
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
 

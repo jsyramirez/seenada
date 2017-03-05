@@ -32,3 +32,6 @@ class DbAccess:
         self.__cursor.execute("select * from user")
         result = self.__cursor.fetchall()
         print result
+    def get_user(self, username):
+        self.__cursor.execute("select * from user where username = %s", (username,))
+        return self.__cursor.fetchone()
