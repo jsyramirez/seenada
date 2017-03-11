@@ -35,6 +35,31 @@ def signin():
             abort(403)
         else:
             return "sign in successfully"    
+
+@app.route('/send_message', methods=['POST'])
+def send_message():
+    content = request.get_json(force=True)
+    response = db.insert_message(content)
+    if response == 'success':
+        return response
+    else:
+        print response
+        abort(500)
+
+@app.route('/get_message', methods=['POST'])
+def get_message():
+    content = request.get_json(force=True)
+    username = content['username']
+    password = content['password']
+    rows = db.get_message(username)
+    messages = []
+    for row in rows:
+        message = {}
+        message['from'] = row[1]
+        message['content'] = row[3]
+        message['timestamp'] = row[5]
+        messages.append(message)
+    return jsonify(messages)
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
 
