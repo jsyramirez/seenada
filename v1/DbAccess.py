@@ -10,7 +10,7 @@ class DbAccess:
         '''Init the variable and get connection'''
         self.__conn = None
         self.__cursor = None
-        self.get_connection()
+        #self.get_connection()
 
     def get_connection(self):
         '''get connection and assign to __conn and __cursor'''
@@ -24,14 +24,20 @@ class DbAccess:
     def insert_user(self, username, password):
         '''insert user into database'''
         try:
+            self.get_connection()
             self.__cursor.execute("insert into user values (%s, %s)", (username, password))
             self.__conn.commit()
+            self.__conn.close()
         except Exception as error:
             logger.error(error)
     def get_all_user(self):
+        self.get_connection()
         self.__cursor.execute("select * from user")
         result = self.__cursor.fetchall()
+        self.__conn.close()
         print result
     def get_user(self, username):
+        self.get_connection()
         self.__cursor.execute("select * from user where username = %s", (username,))
+        self.__conn.close()
         return self.__cursor.fetchone()
