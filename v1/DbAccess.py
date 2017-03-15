@@ -58,7 +58,7 @@ class DbAccess(object):
         '''insert a message'''
         self.get_connection()
         try:
-            frmUser = message['from']
+            frmUser = message['username']
             toUser = message['to']
             content = message['content']
             timestamp = message['timestamp']
