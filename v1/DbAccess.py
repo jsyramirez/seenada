@@ -36,6 +36,7 @@ class DbAccess(object):
             self.__conn.close()
             return 'success'
         except Exception as error:
+            return 'Error: unable to add user. username could  have been chosen. Please use another username'
             logger.error(error)
     def get_all_user(self):
         '''get all user'''
