@@ -6,17 +6,42 @@ import Queue
 from Tkinter import Tk, Text, TOP, BOTH, X, N, LEFT, RIGHT, END, DISABLED, NORMAL, VERTICAL, Scrollbar
 from ttk import Frame, Label, Entry, Button
 
+def check_for_message(queue, username, password):
+	user = username
+	psw = password
+	time.sleep(5)
+	while True:
+ 		req = requests.get("https://seenada.thereyougo.co/get_message", 
+ 			auth={'username': user, 'password': psw})
+ 		if req.status_code != 200:
+ 			print("Error when checking for message\n")
+		for item in req.text:
+			message = item['timestamp'] + "-" + item['from_user'] + ": " + item['content'] + "\n"
+			if message != None: 
+				queue.put(message)
+		time.sleep(.5)
+ 	return
+
 class Client:
  
  	def __init__(self, parent, queue):
  		self.start_up()
  		self.parent = parent
+ 		self.parent.protocol('WM_DELETE_WINDOW', exitApp)
  		self.queue = queue
 		self.msgEntry = Text(self.parent, borderwidth=2,height=10,width=50)
 		self.msgTxt = Text(self.parent, height=10, width=50)
 		self.msgTxt.config(state=DISABLED)
 		self.parent.title("Seenada")
 		self.setUpGUI()
+		self.username = ""
+		self.password = ""
+ 		return
+
+ 	def exitApp(self):
+ 		print("\nTerminating Background Thread....")
+ 		self.msg_thread.join()
+ 		self.parent.destroy()
  		return
 
  	def start_up(self):
@@ -72,6 +97,8 @@ class Client:
 		sendButton = Button(self.parent, text="Send", command=self.sendMessage)
 		sendButton.grid(row=3,column=1)
 		self.parent.after(1000, self.read_queue)
+		self.msg_thread = threading.Thread(target=check_for_message, args=(self.queue, self.username, self.password))
+		self.msg_thread.start()
 
 	def read_queue(self):
 		try:
@@ -84,7 +111,17 @@ class Client:
 		self.parent.after(1000, self.read_queue)
  
  	def sendMessage(self):
- 		print("Message Sent\n")
+ 		recipient = recEntry.get()
+ 		message = msgEntry.get()
+ 		timestamp = 0
+  		req = requests.post("https://seenada.thereyougo.co/send_message",
+ 			data={'from': self.username, 'to': recipient, 'content': message, 'timestamp': timestamp})
+ 		if req.status_code != 200:
+ 			print("Error when trying to send message")
+ 			return False
+ 		self.recEntry.delete(0, END)
+ 		self.msgEntry.delete(0, END)
+ 		print("Message Sent")
  		return True
 
   	def create_new_user(self, username, password):
@@ -93,36 +130,26 @@ class Client:
  		if req.status_code != 200:
  			print("Error when creating user account\n")
  			return False
+ 		self.username = username
+ 		self.password = password
  		return True
  
  	def log_in(self, username, password):
  		req = requests.post("https://seenada.thereyougo.co/signin",
  			data={'username': username, 'password':password})
  		if req.status_code != 200:
- 			print("Could not Log In")
+ 			print("Error when trying to log in")
  			return False
+ 		self.username = username
+ 		self.password = password
  		return True
-
-def check_for_message(queue):
-	time.sleep(5)
-	i = 0
-	while True:
-		new_message = "False" #replace w/ call to server
-		if new_message != None: 
-			print("Checking for messages...")
-			queue.put(new_message + str(i))
-			i = i + 1
-		time.sleep(.5)
- 	return
 
 
 def main():
 	queue = Queue.Queue()
-	msg_thread = threading.Thread(target=check_for_message, args=(queue,))
-	msg_thread.start()
 	root = Tk()
 	root.withdraw()
-	root.geometry("500x500")
+	root.geometry("500x475")
 	app = Client(root, queue)
 	root.mainloop()
 
