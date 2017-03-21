@@ -16,7 +16,7 @@ def check_for_message(queue, username, password):
  		if req.status_code != 200:
  			print("Error when checking for message\n")
 		for item in req.text:
-			message = item['timestamp'] + "-" + item['from_user'] + ": " + item['content'] + "\n"
+			message = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(item['timestamp'])) + "-" + item['from_user'] + ": " + item['content'] + "\n"
 			if message != None: 
 				queue.put(message)
 		time.sleep(.5)
@@ -113,7 +113,7 @@ class Client:
  	def sendMessage(self):
  		recipient = recEntry.get()
  		message = msgEntry.get()
- 		timestamp = 0
+ 		timestamp = int(time.time())
   		req = requests.post("https://seenada.thereyougo.co/send_message",
  			data={'from': self.username, 'to': recipient, 'content': message, 'timestamp': timestamp})
  		if req.status_code != 200:
