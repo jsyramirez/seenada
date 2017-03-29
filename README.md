@@ -3,7 +3,7 @@ This project is a secure end to end chat application, developed for the course I
 
 **Authors**
 - Jocelyn Ramirez(jsyramirez@gmail.com)
-- Thanh Tran ()
+- Thanh Tran (thanhnhut90@gmail.com)
 
 ###External Requirements
 
