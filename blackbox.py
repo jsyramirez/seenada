@@ -1,19 +1,18 @@
+from cryptography.fernet import Fernet
+
 class BlackBox:
+	def generateKey(self):
+		key = Fernet.generate_key()
+		f = Fernet(key)
+		return f
 
-	def encrypt_message(self, message, key):
-		return
+	def encrypt_plaintext(self, plaintext, fernObj):
+		ciphertext = fernObj.encrypt(plaintext)
+		return ciphertext
 
-	def decrypt_message(self, ciphertext, key):
-		return
-
-	def encrypt_login(self, username, password, key):
-		return
-
-	def decrypt_login(self, cipher_username, cipher_password, key):
-		return
+	def decrypt_ciphertext(self, ciphertext, fernObj):  
+		plaintext = fernObj.decrypt(ciphertext)
+		return plaintext
 
 	def __init__(self):
 		return
-
-def main():
-    bb = BlackBox()
