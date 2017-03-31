@@ -7,6 +7,7 @@ import binascii
 import logging
 from flask import Flask, request, jsonify, abort
 import scrypt
+from DbAccess import DbAccess
 
 LOGGER = logging.getLogger("api")
 LOGGER.setLevel(logging.INFO)
@@ -17,6 +18,7 @@ HANDLER.setFormatter(FORMATTER)
 LOGGER.addHandler(HANDLER)
 
 APP = Flask(__name__)
+DB = DbAccess()
 
 @APP.route("/")
 def hello():
@@ -27,13 +29,17 @@ def hello():
 def register():
     '''new user sign up'''
     content = request.get_json(force=True)
-    username = content['username']
+    username = (content['username']).encode('ascii', 'ignore')
     pwd = (content['password']).encode('ascii', 'ignore')
     salt = uuid.uuid4().hex
     hashed_binary_pwd = scrypt.hash(pwd, salt)
     hashed_pwd = binascii.hexlify(hashed_binary_pwd)
-    LOGGER.info(hashed_pwd)
-    return jsonify({"username": username, "password": hashed_pwd, "salt": salt})
+    response = DB.add_user(username, salt, hashed_pwd)
+    if response == 'ok':
+        return "Added successfully"
+    else:
+        LOGGER.error(response)
+        abort(500)
     #need to:
     #insert username into username table and get id out
     #insert id, salt, hashed password into pwd table
@@ -43,9 +49,12 @@ def first_signin():
     '''first signin, return salt'''
     content = request.get_json(force=True)
     username = content['username']
-    #what need to be done:
-    #query userid and then result salt with challenge c
-    return True
+    user = DB.get_user(username)
+    if isinstance(user, dict):
+        challenge = uuid.uuid4().hex
+        return jsonify({"salt": user['salt'], "challenge": challenge})
+    else:
+        return "no user found"
 
 @APP.route("/signin2", methods=['POST'])
 def second_signin():
@@ -54,12 +63,12 @@ def second_signin():
     username = content['username']
     tag = content['tag']
     challenge = content['challenge']
-    #what need to be done
-    #based on username, get userid and query hashed_password
-    #key = hashed_password
-    new_tag = hmac.new('sharedkey', challenge, hashlib.sha512)
+    user = DB.get_user(username)
+    new_tag = hmac.new(user['hashed_pwd'], challenge, hashlib.sha512)
     if hmac.compare_digest(tag, new_tag):
-        return True
+        return "Sign in"
+    else:
+        abort(403)
 
 @APP.route("/get_message", methods=['GET'])
 def get_message():
