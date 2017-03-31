@@ -2,11 +2,13 @@
 '''api for secured chat application'''
 import hmac
 import hashlib
+import time
 import uuid
 import binascii
 import logging
 from flask import Flask, request, jsonify, abort
 import scrypt
+import jwt
 from DbAccess import DbAccess
 
 LOGGER = logging.getLogger("api")
@@ -40,9 +42,6 @@ def register():
     else:
         LOGGER.error(response)
         abort(500)
-    #need to:
-    #insert username into username table and get id out
-    #insert id, salt, hashed password into pwd table
 
 @APP.route("/signin1", methods=['POST'])
 def first_signin():
@@ -60,21 +59,23 @@ def first_signin():
 def second_signin():
     '''second sign in, return JWT token'''
     content = request.get_json(force=True)
-    username = content['username']
-    tag = content['tag']
-    challenge = content['challenge']
+    username = (content['username']).encode('ascii', 'ignore')
+    tag = (content['tag']).encode('ascii', 'ignore')
+    challenge = (content['challenge']).encode('ascii', 'ignore')
     user = DB.get_user(username)
     new_tag = hmac.new(user['hashed_pwd'], challenge, hashlib.sha512)
-    if hmac.compare_digest(tag, new_tag):
-        return "Sign in"
+    if hmac.compare_digest(tag, new_tag.hexdigest()):
+        return jwt.encode({'username': username, 'exp': int(time.time())+3600}, 'mysecret', algorithm='HS512')
     else:
         abort(403)
 
 @APP.route("/get_message", methods=['GET'])
 def get_message():
     '''return message back to user'''
-    #based on JWT token, get username, and query unread message from database
-    return "Message"
+    jwt_token = request.headers.get('Auth')
+    result = jwt.decode(jwt_token, 'mysecret')
+    return result['username']
+    #need to implement this method
 
 @APP.route("/send_message", methods=['POST'])
 def send_message():

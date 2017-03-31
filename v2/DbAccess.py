@@ -64,7 +64,7 @@ class DbAccess(object):
         '''get user from username'''
         if self.get_connection() == 'ok':
             try:
-                self.__cursor.execute("select users.id, users.username, pwd.salt, pwd.hashed_pwd\
+                self.__cursor.execute("select users.id, users.username, pwd.salt, pwd.password\
                                        from users inner join pwd on users.id = pwd.id\
                                        where username = %s", (username,))
                 result = self.__cursor.fetchone()
