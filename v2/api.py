@@ -85,8 +85,6 @@ def get_message():
         result = jwt.decode(jwt_token, 'mysecret')
         this_moment = int(time.time())
         token_exp = result.get('exp', None)
-        print token_exp
-        print this_moment
         username = result.get('username', '')
         if (token_exp is not None) and (this_moment <= token_exp):
             return jsonify(DB.get_unread_message(username))
@@ -102,12 +100,19 @@ def send_message():
     #based on JWT token, get username and information, and insert to database
     jwt_token = request.headers.get('Auth', None)
     if jwt_token is not None:
-        content = request.get_json(force=True)
-        response = DB.add_message(content)
-        if response == 'ok':
-            return "Success"
+        result = jwt.decode(jwt_token, 'mysecret')
+        this_moment = int(time.time())
+        token_exp = result.get('exp', None)
+        if (token_exp is not None) and (this_moment <= token_exp):
+            content = request.get_json(force=True)
+            response = DB.add_message(content)
+            if response == 'ok':
+                return "Success"
+            else:
+                return "Error"
         else:
-            return "Error"
+            LOGGER.debug(token_exp)
+            return jsonify({'Error': 'Token has expired. Please re-sigin'})
     else:
         abort(403)
 
