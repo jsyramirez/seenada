@@ -87,7 +87,7 @@ class DbAccess(object):
         if self.get_connection() == 'ok':
             try:
                 values = (message_obj['from'], message_obj['to'],
-                          message_obj['message'], message_obj['time'], 1)
+                          message_obj['msg'], message_obj['time'], 0)
                 self.__cursor.execute("insert into messages\
                                       (fromUsr, toUsr, content, timestamp, isRead)\
                                       values (%s, %s, %s, %s, %s)", values)
@@ -96,6 +96,9 @@ class DbAccess(object):
             except pymysql.Error as err:
                 LOGGER.exception(err)
                 return 'error'
+            except KeyError as kerror:
+                LOGGER.exception(kerror)
+                return "Error: invalid json"
             finally:
                 self.close_connection()
         else:
@@ -106,13 +109,20 @@ class DbAccess(object):
         if self.get_connection() == 'ok':
             try:
                 self.__cursor.execute("select * from messages\
-                                       where username = %s and isRead = 0", (username,))
-                result = self.__cursor.fetchall()
-                if result is None:
+                                       where toUsr = %s and isRead = 0", (username,))
+                results = self.__cursor.fetchall()
+                if results is None:
                     return 'No new message'
                 else:
-                    return {"from": result[1], "to": result[2],
-                            "message": result[3], "timestamp": result[4]}
+                    try:
+                        messages = []
+                        for result in results:
+                            messages.append({"from": result[1], "to": result[2],
+                                             "message": result[3], "timestamp": result[4]})
+                        return messages
+                    except KeyError as error:
+                        LOGGER.exception(error)
+                        return 'error'
             except pymysql.Error as err:
                 LOGGER.exception(err)
                 return 'error'
