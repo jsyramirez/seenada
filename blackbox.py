@@ -1,18 +1,24 @@
-from cryptography.fernet import Fernet
+import os
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.backends import default_backend
 
 class BlackBox:
-	def generateKey(self):
-		key = Fernet.generate_key()
-		f = Fernet(key)
-		return f
-
-	def encrypt_plaintext(self, plaintext, fernObj):
-		ciphertext = fernObj.encrypt(plaintext)
-		return ciphertext
-
-	def decrypt_ciphertext(self, ciphertext, fernObj):  
-		plaintext = fernObj.decrypt(ciphertext)
-		return plaintext
-
 	def __init__(self):
-		return
+		self.backend = default_backend()
+
+	def generateRandomKey(self):
+		key = os.urandom(256)
+		return key
+
+	def encrypt_plaintext(self, plaintext, key):
+		iv = os.urandom(128)
+		cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=self.backend)
+		encrypt_box = cipher.encryptor()
+		ciphertext = encrypt_box.update(plaintext) + encrypt_box.finalize()
+		return ciphertext, iv
+
+	def decrypt_ciphertext(self, ciphertext, key, iv):
+		cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=self.backend)
+		decrypt_box = cipher.decryptor()
+		plaintext = decrypt_box.update(ciphertext) + decrypt_box.finalize()
+		return plaintext
