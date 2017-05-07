@@ -11,14 +11,15 @@ def check_for_message(queue, username, password):
 	psw = password
 	time.sleep(5)
 	while True:
- 		req = requests.get("https://seenada.thereyougo.co/get_message", 
- 			auth={'username': user, 'password': psw})
- 		if req.status_code != 200:
- 			print("Error when checking for message\n")
-		for item in req.text:
-			message = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(item['timestamp'])) + "-" + item['from_user'] + ": " + item['content'] + "\n"
-			if message != None: 
-				queue.put(message)
+ 		#req = requests.get("https://seenada.thereyougo.co/get_message", 
+ 		#	auth={'username': user, 'password': psw})
+ 		#if req.status_code != 200:
+ 		#	print("Error when checking for message\n")
+		#for item in req.text:
+		#	message = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(item['timestamp'])) + "-" + item['from_user'] + ": " + item['content'] + "\n"
+		#	if message != None: 
+		#		queue.put(message)
+		queue.put("test")
 		time.sleep(.5)
  	return
 
@@ -27,7 +28,7 @@ class Client:
  	def __init__(self, parent, queue):
  		self.start_up()
  		self.parent = parent
- 		self.parent.protocol('WM_DELETE_WINDOW', exitApp)
+ 		self.parent.protocol('WM_DELETE_WINDOW', self.exitApp)
  		self.queue = queue
 		self.msgEntry = Text(self.parent, borderwidth=2,height=10,width=50)
 		self.msgTxt = Text(self.parent, height=10, width=50)
@@ -45,11 +46,11 @@ class Client:
  		return
 
  	def start_up(self):
- 		req = requests.get("https://seenada.thereyougo.co/")
- 		if req != 200:
- 			print("Could Not Connect To Server....terminating\n")
- 			time.sleep(3)
- 			return
+ 		#req = requests.get("https://seenada.thereyougo.co/")
+ 		#if req != 200:
+ 	#		print("Could Not Connect To Server....terminating\n")
+ 		#	time.sleep(3)
+ 		#	return
  		start_up_input = raw_input("Select Option:\n1. Create New Account\n2. Log In\n")
  		if start_up_input == "1":
  			username = raw_input("Create Username: ")
@@ -125,21 +126,21 @@ class Client:
  		return True
 
   	def create_new_user(self, username, password):
- 		req = requests.post("https://seenada.thereyougo.co/signup", 
- 			data={'username':username, 'password':password})
- 		if req.status_code != 200:
- 			print("Error when creating user account\n")
- 			return False
+ 		#req = requests.post("https://seenada.thereyougo.co/signup", 
+ 		#	data={'username':username, 'password':password})
+ 		#if req.status_code != 200:
+ 		#	print("Error when creating user account\n")
+ 		#	return False
  		self.username = username
  		self.password = password
  		return True
  
  	def log_in(self, username, password):
- 		req = requests.post("https://seenada.thereyougo.co/signin",
- 			data={'username': username, 'password':password})
- 		if req.status_code != 200:
- 			print("Error when trying to log in")
- 			return False
+ 		#req = requests.post("https://seenada.thereyougo.co/signin",
+ 		#	data={'username': username, 'password':password})
+ 		#if req.status_code != 200:
+ 		#	print("Error when trying to log in")
+ 		#	return False
  		self.username = username
  		self.password = password
  		return True
