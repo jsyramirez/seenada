@@ -119,6 +119,8 @@ class DbAccess(object):
                         for result in results:
                             messages.append({"from": result[1], "to": result[2],
                                              "message": result[3], "timestamp": result[4]})
+                            self.__cursor.execute('update messages set isRead = 1 where id=%s', (result[0],))
+                        self.__conn.commit()
                         return messages
                     except KeyError as error:
                         LOGGER.exception(error)
