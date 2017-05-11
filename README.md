@@ -1,7 +1,7 @@
 ## seenada
 This project is a secure end to end desktop chat application, developed for the course Information Security at CSU Long Beach. 
 
-**Authors**
+### Authors
 - Jocelyn Ramirez(jsyramirez@gmail.com)
 - Thanh Tran ()
 
