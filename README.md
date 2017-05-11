@@ -6,13 +6,13 @@ This project is a secure end to end desktop chat application, developed for the 
 - Thanh Tran ()
 
 ### External Requirements
-Crytography: AES (CBC), RSA (OAEP), Hash (SHA-512)
-PyOpenSSL
-MySQL
-Scrypt
-PyJWT
-Tkinter (GUI)
-Requests (POST, GET)
+- Crytography: AES (CBC), RSA (OAEP), Hash (SHA-512)
+- PyOpenSSL
+- MySQL
+- Scrypt
+- PyJWT
+- Tkinter (GUI)
+- Requests (POST, GET)
 
 ### Usage
 1. Run client.py script: python client.py
